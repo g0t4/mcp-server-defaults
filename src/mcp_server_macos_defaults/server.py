@@ -123,13 +123,76 @@ async def handle_list_tools() -> list[types.Tool]:
             },
         ),
         # defaults read <domain> <key> # key is optional, domain required
+        types.Tool(
+            name="defaults-read",
+            description = "use the `defaults read <domain> <key>` command",
+            inputSchema = {
+                "type": "object",
+                "properties": {
+                    "domain": {
+                        "type": "string",
+                        "description": "Domain to read from",
+                    },
+                    "key": {
+                        "type": "string",
+                        "description": "Key to read from",
+                    },
+                },
+                "required": ["domain"],
+            },
+        ),
         # defaults write <domain> <key> <value>
+        types.Tool(
+            name="defaults-write",
+            description = "use the `defaults write <domain> <key> <value>` command",
+            inputSchema = {
+                "type": "object",
+                "properties": {
+                    "domain": {
+                        "type": "string",
+                        "description": "Domain to write to",
+                    },
+                    "key": {
+                        "type": "string",
+                        "description": "Key to write to",
+                    },
+                    "value": {
+                        "type": "string",
+                        "description": "Value to write",
+                    },
+                },
+                "required": ["domain", "key", "value"],
+            },
+        ),
         # TODO dictionary values?
         # defaults read-type <domain> <key>
         # defaults delete <domain> <key> # key is optional, domain required
-        # defaults find <word> # ask for help to find a setting, that alone is possibly very useful
-        # defaults 
     ]
+
+def defaults_read(arguments: dict | None) -> list[types.TextContent]:
+    if arguments is None:
+        return []
+    domain = arguments["domain"]
+    key = arguments.get("key")
+
+    if key is None:
+        result = subprocess.run(["defaults", "read", domain], capture_output=True)
+        return [types.TextContent(type="text", text=result.stdout.decode("utf-8"))]
+
+    result = subprocess.run(["defaults", "read", domain, key], capture_output=True)
+    value = result.stdout.decode("utf-8").strip()
+    return [types.TextContent(type="text", text=f"{key}: {value}")]
+
+def defaults_write(arguments: dict | None) -> list[types.TextContent]:
+    if arguments is None:
+        return []
+    domain = arguments["domain"]
+    key = arguments["key"]
+    value = arguments["value"]
+
+    # TODO do I need to notify client that resource changed? can't it just ask for it again?
+    result = subprocess.run(["defaults", "write", domain, key, value], capture_output=True)
+    return [types.TextContent(type="text", text=result.stdout.decode("utf-8"))]
 
 def list_domains() -> list[types.TextContent]: # get array of domains:
     # run command `defaults domains`
@@ -156,6 +219,10 @@ async def handle_call_tool(name: str, arguments: dict | None) -> list[types.Text
         return list_domains()
     elif name == "find":
         return find(arguments)
+    elif name == "defaults-read":
+        return defaults_read(arguments)
+    elif name == "defaults-write":
+        return defaults_write(arguments)
     else:
         raise ValueError(f"Unknown tool: {name}")
 
