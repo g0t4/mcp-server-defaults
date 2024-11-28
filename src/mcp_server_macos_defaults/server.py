@@ -104,7 +104,10 @@ async def handle_list_tools() -> list[types.Tool]:
         types.Tool(
             name="list-domains",
             description="List all available macOS domains, same as `defaults domains`",
-            inputSchema={}, # TODO filter domains?
+            inputSchema= {
+                "type": "object",
+                "properties": {},
+            }, # TODO filter domains?
         ),
     ]
 
