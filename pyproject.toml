@@ -1,0 +1,17 @@
+[project]
+name = "mcp-server-macos-defaults"
+version = "0.1.0"
+description = "MCP server for reading/writing macOS defaults (settings)"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [ "mcp>=1.0.0",]
+[[project.authors]]
+name = "Wes Higbee"
+email = "wes.mcclure@gmail.com"
+
+[build-system]
+requires = [ "hatchling",]
+build-backend = "hatchling.build"
+
+[project.scripts]
+mcp-server-macos-defaults = "mcp_server_macos_defaults:main"
