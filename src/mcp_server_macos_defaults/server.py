@@ -1,4 +1,5 @@
 import asyncio
+import subprocess
 
 from mcp.server.models import InitializationOptions
 import mcp.types as types
@@ -101,17 +102,10 @@ async def handle_list_tools() -> list[types.Tool]:
     """
     return [
         types.Tool(
-            name="add-note",
-            description="Add a new note",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "name": {"type": "string"},
-                    "content": {"type": "string"},
-                },
-                "required": ["name", "content"],
-            },
-        )
+            name="list-domains",
+            description="List all available macOS domains, same as `defaults domains`",
+            inputSchema={}, # TODO filter domains?
+        ),
     ]
 
 @server.call_tool()
@@ -122,33 +116,21 @@ async def handle_call_tool(
     Handle tool execution requests.
     Tools can modify server state and notify clients of changes.
     """
-    if name != "add-note":
+    if name != "list-domains":
         raise ValueError(f"Unknown tool: {name}")
 
-    if not arguments:
-        raise ValueError("Missing arguments")
+    # # Notify clients that resources have changed
+    # await server.request_context.session.send_resource_list_changed()
 
-    note_name = arguments.get("name")
-    content = arguments.get("content")
-
-    if not note_name or not content:
-        raise ValueError("Missing name or content")
-
-    # Update server state
-    notes[note_name] = content
-
-    # Notify clients that resources have changed
-    await server.request_context.session.send_resource_list_changed()
-
-    return [
-        types.TextContent(
-            type="text",
-            text=f"Added note '{note_name}' with content: {content}",
-        )
-    ]
+    # get array of domains:
+    # run command `defaults domains`
+    result = subprocess.run(["defaults", "domains"], capture_output=True)
+    domains = result.stdout.decode("utf-8").split(",")
+    domains = [domain.strip() for domain in domains]
+    return [types.TextContent(type="text", text=f"Domains: {domains}")]
 
 async def main():
-    # Run the server using stdin/stdout streams
+
     async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
         await server.run(
             read_stream,
