@@ -234,7 +234,7 @@ async def main():
             write_stream,
             InitializationOptions(
                 server_name="mcp-server-macos-defaults",
-                server_version="0.1.1",
+                server_version="0.1.2",
                 capabilities=server.get_capabilities(
                     notification_options=NotificationOptions(),
                     experimental_capabilities={},

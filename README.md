@@ -8,6 +8,13 @@ MCP server for reading/writing macOS defaults (settings)
 
 - `list-domains`:
   - equivalent to running `defaults domains`
+- `find`:
+  - equivalent to running `defaults find <word>`
+- `defaults-read`:
+  - equivalent to running `defaults read <domain> <key>`
+  - if `key` is not provided, the entire domain is read
+- `defaults-write`:
+  - equivalent to running `defaults write <domain> <key> <value>`
 
 ## Quickstart
 
