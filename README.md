@@ -4,29 +4,10 @@ MCP server for reading/writing macOS defaults (settings)
 
 ## Components
 
-### Resources
-
-The server implements a simple note storage system with:
-- Custom note:// URI scheme for accessing individual notes
-- Each note resource has a name, description and text/plain mimetype
-
-### Prompts
-
-The server provides a single prompt:
-- summarize-notes: Creates summaries of all stored notes
-  - Optional "style" argument to control detail level (brief/detailed)
-  - Generates prompt combining all current notes with style preference
-
 ### Tools
 
-The server implements one tool:
-- add-note: Adds a new note to the server
-  - Takes "name" and "content" as required string arguments
-  - Updates server state and notifies clients of resource changes
-
-## Configuration
-
-[TODO: Add configuration details specific to your implementation]
+- `list-domains`:
+  - equivalent to running `defaults domains`
 
 ## Quickstart
 
@@ -45,7 +26,7 @@ On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
       "command": "uv",
       "args": [
         "--directory",
-        "/Users/wes/repos/github/g0t4/mcp-server-macos-defaults",
+        "/path/to/mcp-server-macos-defaults",
         "run",
         "mcp-server-macos-defaults"
       ]
@@ -104,7 +85,7 @@ experience, we strongly recommend using the [MCP Inspector](https://github.com/m
 You can launch the MCP Inspector via [`npm`](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) with this command:
 
 ```bash
-npx @modelcontextprotocol/inspector uv --directory /Users/wes/repos/github/g0t4/mcp-server-macos-defaults run mcp-server-macos-defaults
+npx @modelcontextprotocol/inspector uv --directory /path/to/mcp-server-macos-defaults run mcp-server-macos-defaults
 ```
 
 
