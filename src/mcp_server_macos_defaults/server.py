@@ -109,28 +109,55 @@ async def handle_list_tools() -> list[types.Tool]:
                 "properties": {},
             }, # TODO filter domains?
         ),
+        types.Tool(
+            name="find",
+            description="Find entries container given word",
+            inputSchema= {
+                "type": "object",
+                "properties": {
+                    "word": {
+                        "type": "string",
+                        "description": "Word to search for",
+                    },
+                },
+            },
+        ),
+        # defaults read <domain> <key> # key is optional, domain required
+        # defaults write <domain> <key> <value>
+        # TODO dictionary values?
+        # defaults read-type <domain> <key>
+        # defaults delete <domain> <key> # key is optional, domain required
+        # defaults find <word> # ask for help to find a setting, that alone is possibly very useful
+        # defaults 
     ]
 
-@server.call_tool()
-async def handle_call_tool(
-    name: str, arguments: dict | None
-) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
-    """
-    Handle tool execution requests.
-    Tools can modify server state and notify clients of changes.
-    """
-    if name != "list-domains":
-        raise ValueError(f"Unknown tool: {name}")
-
-    # # Notify clients that resources have changed
-    # await server.request_context.session.send_resource_list_changed()
-
-    # get array of domains:
+def list_domains() -> list[types.TextContent]: # get array of domains:
     # run command `defaults domains`
     result = subprocess.run(["defaults", "domains"], capture_output=True)
     domains = result.stdout.decode("utf-8").split(",")
     domains = [domain.strip() for domain in domains]
     return [types.TextContent(type="text", text=f"Domains: {domains}")]
+
+def find(arguments: dict | None) -> list[types.TextContent]: # ask for help to find a setting, that alone is possibly very useful
+    if arguments is None:
+        raise ValueError("Arguments are required")
+    word = arguments["word"]
+    result = subprocess.run(["defaults", "find", word], capture_output=True)
+    return [types.TextContent(type="text", text=f"Found: {result.stdout.decode('utf-8')}")]
+
+@server.call_tool()
+async def handle_call_tool(name: str, arguments: dict | None) -> list[types.TextContent]:
+    # TODO => other types? | types.ImageContent | types.EmbeddedResource]:
+
+    # # Notify clients that resources have changed (if server changes resources)
+    # await server.request_context.session.send_resource_list_changed()
+
+    if name == "list-domains":
+        return list_domains()
+    elif name == "find":
+        return find(arguments)
+    else:
+        raise ValueError(f"Unknown tool: {name}")
 
 async def main():
 
